@@ -16,6 +16,8 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useState } from "react";
+import { arrayMove, insertAtIndex, removeAtIndex } from "./utils/array";
 type MenuItem = Required<MenuProps>["items"][number];
 // const SortableItem = ({ id, children }) => {
 //   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -34,6 +36,19 @@ type MenuItem = Required<MenuProps>["items"][number];
 //     </div>
 //   );
 // };
+const moveBetweenContainers = (
+  items,
+  activeContainer,
+  activeIndex,
+  overContainer,
+  overIndex,
+  item
+) => {
+  return {
+    ...items,
+    [overContainer]: insertAtIndex(items[overContainer], overIndex, item),
+  };
+};
 const SortableItem = (props) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: props.id });
@@ -59,7 +74,7 @@ const SortableItem = (props) => {
   );
 };
 
-const items2: MenuItem[] = [
+const initialItems: MenuItem[] = [
   {
     label: (
       <SortableItem id="mail" key="mail">
@@ -93,14 +108,18 @@ const items2: MenuItem[] = [
     key: "app",
   },
 ];
-const Menu = ({ items }) => {
+const Menu = ({ items, sortItemKeys }) => {
   const id = "menu2";
   const { setNodeRef } = useDroppable({ id });
 
   return (
-    <SortableContext id={id} items={items} strategy={rectSortingStrategy}>
+    <SortableContext
+      id={id}
+      items={sortItemKeys}
+      strategy={rectSortingStrategy}
+    >
       <div ref={setNodeRef}>
-        <Dropdown menu={{ items: items2 }} trigger={["click"]}>
+        <Dropdown menu={{ items }} trigger={["click"]}>
           <a onClick={(e) => e.preventDefault()}>
             <Button>Click me</Button>
           </a>
@@ -110,9 +129,8 @@ const Menu = ({ items }) => {
   );
 };
 function App() {
-  const items = {
-    group1: ["mail", "mail1", "mail2", "mail3"],
-  };
+  const sortItemKeys = ["mail", "mail1", "mail2", "mail3"];
+  const [items, setItems] = useState(initialItems);
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -120,8 +138,27 @@ function App() {
     })
   );
   const handleDragEnd = ({ active, over }) => {
-    console.log(123123, { active, over });
+    if (!over) {
+      return;
+    }
+
+    if (active.id !== over.id) {
+      // const activeContainer = active.data.current.sortable.containerId;
+      // const overContainer = over.data.current?.sortable.containerId || over.id;
+      const activeIndex = active.data.current.sortable.index;
+      const overIndex = over.data.current?.sortable.index || 0;
+
+      setItems((items) => {
+        const newSortedItems = arrayMove(sortItemKeys, activeIndex, overIndex);
+        const sortFn = (a, b) =>
+          newSortedItems.indexOf(a.key) - newSortedItems.indexOf(b.key);
+        const newItems = items.sort(sortFn);
+
+        return newItems;
+      });
+    }
   };
+
   const containerStyle = {
     display: "flex",
     justifyContent: "center",
@@ -129,11 +166,12 @@ function App() {
     width: "100vw",
     height: "100vh",
   };
+  console.log("item", items);
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <div style={containerStyle}>
-        <Menu items={items.group1} />
+        <Menu items={items} sortItemKeys={sortItemKeys} />
       </div>
     </DndContext>
   );
