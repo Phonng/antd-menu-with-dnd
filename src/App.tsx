@@ -7,7 +7,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import type { MenuProps } from "antd";
-import { Menu as AntdMenu, Button, Dropdown } from "antd";
+import { Button, Dropdown } from "antd";
 
 import {
   SortableContext,
@@ -16,7 +16,6 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useState } from "react";
 type MenuItem = Required<MenuProps>["items"][number];
 // const SortableItem = ({ id, children }) => {
 //   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -111,9 +110,9 @@ const Menu = ({ items }) => {
   );
 };
 function App() {
-  const [items, setItems] = useState({
+  const items = {
     group1: ["mail", "mail1", "mail2", "mail3"],
-  });
+  };
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
