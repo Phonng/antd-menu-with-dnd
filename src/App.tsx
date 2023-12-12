@@ -73,6 +73,7 @@ const SortableItem = (props) => {
     </div>
   );
 };
+const initialSortItemKeys: string[] = ["mail", "mail1", "mail2", "mail3"];
 
 const initialItems: MenuItem[] = [
   {
@@ -89,7 +90,7 @@ const initialItems: MenuItem[] = [
         Navigation 2
       </SortableItem>
     ),
-    key: "app1",
+    key: "mail1",
   },
   {
     label: (
@@ -97,7 +98,7 @@ const initialItems: MenuItem[] = [
         Navigation 3
       </SortableItem>
     ),
-    key: "mail1",
+    key: "mail2",
   },
   {
     label: (
@@ -105,7 +106,7 @@ const initialItems: MenuItem[] = [
         Navigation 4
       </SortableItem>
     ),
-    key: "app",
+    key: "mail3",
   },
 ];
 const Menu = ({ items, sortItemKeys }) => {
@@ -129,7 +130,7 @@ const Menu = ({ items, sortItemKeys }) => {
   );
 };
 function App() {
-  const sortItemKeys = ["mail", "mail1", "mail2", "mail3"];
+  const [sortItemKeys, setSortItemKeys] = useState(initialSortItemKeys);
   const [items, setItems] = useState(initialItems);
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -143,17 +144,14 @@ function App() {
     }
 
     if (active.id !== over.id) {
-      // const activeContainer = active.data.current.sortable.containerId;
-      // const overContainer = over.data.current?.sortable.containerId || over.id;
       const activeIndex = active.data.current.sortable.index;
       const overIndex = over.data.current?.sortable.index || 0;
-
+      const newSortedItems = arrayMove(sortItemKeys, activeIndex, overIndex);
+      setSortItemKeys(newSortedItems);
       setItems((items) => {
-        const newSortedItems = arrayMove(sortItemKeys, activeIndex, overIndex);
-        const sortFn = (a, b) =>
-          newSortedItems.indexOf(a.key) - newSortedItems.indexOf(b.key);
-        const newItems = items.sort(sortFn);
-
+        const newItems = newSortedItems.map((value) =>
+          items.find((obj) => obj.key === value)
+        );
         return newItems;
       });
     }
@@ -166,7 +164,6 @@ function App() {
     width: "100vw",
     height: "100vh",
   };
-  console.log("item", items);
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
