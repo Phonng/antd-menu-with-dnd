@@ -1,19 +1,9 @@
-import {
-  DndContext,
-  KeyboardSensor,
-  PointerSensor,
-  useDroppable,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import type { MenuProps } from "antd";
 import { Button } from "antd";
 
 import { useState } from "react";
 import SortableDropDownMenu from "./components/dropdownDnD";
-type MenuItem = Required<MenuProps>["items"][number];
 
-const initialItems: MenuItem[] = [
+const initialItems = [
   {
     label: " Navigation 1",
     key: "mail",
@@ -40,8 +30,8 @@ function App() {
     width: "100vw",
     height: "100vh",
   };
-  const [value, setValue] = useState<MenuItem[]>(initialItems);
-  const handleChange = (newItems: MenuItem[]) => {
+  const [value, setValue] = useState<string[]>(initialItems);
+  const handleChange = (newItems: string[]) => {
     setValue(newItems);
   };
 
